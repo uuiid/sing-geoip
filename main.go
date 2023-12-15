@@ -163,21 +163,12 @@ func write(writer *mmdbwriter.Tree, dataMap map[string][]*net.IPNet, output stri
 	return err
 }
 
-func release(source string, destination string, output string, ruleSetOutput string) error {
+func release(source string, output string, ruleSetOutput string) error {
 	sourceRelease, err := fetch(source)
 	if err != nil {
 		return err
 	}
-	destinationRelease, err := fetch(destination)
-	if err != nil {
-		log.Warn("missing destination latest release")
-	} else {
-		if os.Getenv("NO_SKIP") != "true" && strings.Contains(*destinationRelease.Name, *sourceRelease.Name) {
-			log.Info("already latest")
-			setActionOutput("skip", "true")
-			return nil
-		}
-	}
+
 	binary, err := download(sourceRelease)
 	if err != nil {
 		return err
@@ -241,7 +232,7 @@ func release(source string, destination string, output string, ruleSetOutput str
 		outputRuleSet.Close()
 	}
 
-	setActionOutput("tag", *sourceRelease.Name)
+	setActionOutput("tag", *sourceRelease.TagName)
 	return nil
 }
 
@@ -250,7 +241,7 @@ func setActionOutput(name string, content string) {
 }
 
 func main() {
-	err := release("Loyalsoldier/geoip", "sagernet/sing-geoip", "geoip.db", "rule-set")
+	err := release("Loyalsoldier/geoip", "geoip.db", "rule-set")
 	if err != nil {
 		log.Fatal(err)
 	}
